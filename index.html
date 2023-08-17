@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API REST PRACTICE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-12 mb-5 text-center bg-primary text-white">
+            <h2>API REST AND MYSQLI</h2>
+        </div>
+        <div class="col-12"> 
+            <table class="table table-bordered">
+                <form action="" method="POST" id="formSubmit">
+                    <tr>
+                        <td><label>Search : </label></td>
+                        <td><input type="text" name="search" id="search" class="form-control" placeholder="Search...."></td>                   
+                        </tr>
+                    <tr>
+                    <td><label>First Name</label></td>
+                    <td><input type="text" name="fname" id="fname" class="form-control"></td>
+                    
+                    </tr>
+
+                    <tr>
+                        <td><label>Last Name</label></td>
+                        <td><input type="text" name="last_name" id="last_name" class="form-control"></td>
+                    </tr>
+                   
+                    <tr>
+                        <td><label>Age</label></td>
+                        <td><input type="number" name="age" id="age" class="form-control"></td> 
+                    </tr>
+
+                    <tr>
+                        <td><label>City</label></td>
+                        <td><select class="form-select" name="city" id="city">
+                          <option value="" hidden>Please select City....</option>
+                        
+                         </select></td>
+
+                    </tr>
+                   <tr>
+                    <td></td>
+                    <td><button type="button" class="btn btn-primary" id="submit-btn">Submit</button></td>
+                   </tr>
+               
+                  
+                </form>
+          
+            </table>
+   
+        </div>
+        <div class="col-12">
+            <table class="table table-bordered mt-5">
+                <thead class="bg-primary text-white">
+                    <th>S.No</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                    <th>Modify</th>
+                    <th>Delete</th>
+                </thead>
+
+                <tbody id="load-table"></tbody>
+                
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <table class="table table-bordered">
+                <form action="" id="form_Update">
+                  
+                    <tr>
+                    <td><label>First Name</label></td>
+                    <td>
+                        <input type="text" name="edit_id" id="edit_id" hidden class="form-control">
+                        <input type="text" name="ename" id="ename" class="form-control">
+                    </td>
+                    
+                    </tr>
+
+                    <tr>
+                        <td><label>Last Name</label></td>
+                        <td><input type="text" name="elast_name" id="elast_name" class="form-control"></td>
+                    </tr>
+                   
+                    <tr>
+                        <td><label>Age</label></td>
+                        <td><input type="number" name="eage" id="eage" class="form-control"></td> 
+                    </tr>
+
+                    <tr>
+                        <td><label>City</label></td>
+                        <td><select class="form-select" name="ecity" id="ecity">
+                            <option value="" hidden>Please select City....</option>
+                          
+                         </select></td>
+
+                    </tr>
+                   <tr>
+                    <td></td>
+                    <td><button type="button" class="btn btn-primary" id="update-btn">Update</button></td>
+                   </tr>
+               
+                </form>
+          
+            </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="error-message"></div>
+  <div id="success-message"></div>
+    
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script>
+   $(document).ready(function(){
+      /***loadData*******/
+      function loadTable() {
+        $("#load-table").html("");
+        $.ajax({
+           url : "http://localhost/rest%20api%20practice/API%20REST/loadTable.php",
+           type : "GET",
+           success : function(data) {
+            if(data.status == false) {
+               $("#load-table").append("<tr>"+ "<td colsapn=7>" + data.message + "</td>" + "</tr>")
+            }else{
+              
+                var sno = 1;
+              $.each(data, function(key, value) {
+                $("#load-table").append("<tr>"
+                    + "<td>" + sno + "</td>" 
+                    + "<td>" + value.stu_name + "</td>"
+                    + "<td>" + value.last_name + "</td>"
+                    + "<td>" + value.Age + "</td>"
+                    + "<td>" + value.City + "</td>"
+                    + "<td><button class='btn btn-primary btn-sm' id='edit-btn' data-eid='"+ value.id +"' data-bs-toggle='modal' data-bs-target='#staticBackdrop'>Update</button></td>"
+                    + "<td><button class='btn btn-danger btn-sm' id='delete-btn' data-id='"+ value.id +"'>Delete</button></td>"
+                    + "</tr>");
+                  sno++;
+              })
+              
+               
+            }
+
+           }
+
+        });
+      }
+
+      loadTable();
+
+
+
+          /****Show arror and success message function*****/
+
+     function message(message, status) {
+        if(status == true) {
+            $("#success-message").html(message).slideDown();
+           $("#error-message").slideUp();
+           setTimeout(function() {
+            $("#success-message").html(message).slideUp();
+           }, 3000)
+        }else if(status == false){
+            $("#error-message").html(message).slideDown();
+           $("#success-message").slideUp(); 
+
+           setTimeout(function() {
+            $("#error-message").slideUp();
+           }, 3000)
+        }
+     }
+
+
+     /*********function for form data convert json data ***/
+
+     function jsonData(targetForm) {
+        var array = $(targetForm).serializeArray();
+        var obj = {};
+         for(var a = 0; a < array.length; a++) {
+            if(array[0].value = "") {
+              return false;
+            }
+            obj[array[a].name] = array[a].value;
+           
+         }
+
+         var json_string = JSON.stringify(obj);
+         return json_string;
+     }
+
+
+
+      /****fetch city*******/
+       
+      $.ajax({
+           url : "http://localhost/rest%20api%20practice/API%20REST/fetch-city.php",
+           type : "GET",
+           success : function(data) {
+              $.each(data, function(key, value) {
+                 $("#city").append("<option value='"+ value.City +"'>"+ value.City +"</option>"); 
+              })
+              
+          
+           }
+
+        });
+
+
+
+        
+      /****fetch city Update*******/
+       
+      $.ajax({
+           url : "http://localhost/rest%20api%20practice/API%20REST/fetch-city.php",
+           type : "GET",
+           success : function(data) {
+              $.each(data, function(key, value) {
+                 $("#ecity").append("<option value='"+ value.City +"'>"+ value.City +"</option>"); 
+              })
+              
+          
+           }
+
+        });
+
+        /****insert data ******/
+
+           $("#submit-btn").on("click", function(e) {
+            e.preventDefault();
+            var jsonObj = jsonData("#formSubmit");
+             if(jsonObj == false) {
+                message("All field are Required", false);
+             }else {
+                $.ajax({
+                    url : "http://localhost/rest%20api%20practice/API%20REST/add-data.php",
+                    type : "POST",
+                    data : jsonObj,
+                    success : function(data) {
+                       message(data.message, data.status);
+
+                       if(data.status == true) {
+                        loadTable();
+                           $("#formSubmit").trigger("reset");
+                       }
+                    }
+                });
+             }
+           })
+
+
+         /****single data update ******/
+
+          $(document).on("click", "#edit-btn", function() {
+               var client_id = $(this).data("eid");
+               var obj = {sid : client_id};
+               var jsonData = JSON.stringify(obj);
+
+                $.ajax({
+                     url : "http://localhost/rest%20api%20practice/API%20REST/single-fetch.php",
+                     type : "POST",
+                     data : jsonData,
+                     success : function(data) {
+                        $("#edit_id").val(data[0].id);
+                        $("#ename").val(data[0].stu_name);
+                        $("#elast_name").val(data[0].last_name);
+                        $("#eage").val(data[0].Age);
+                        $("#ecity").val(data[0].City);
+                     }
+                });
+          });
+            
+
+
+            /********Update data********/
+             $("#update-btn").on("click", function(e) {
+                e.preventDefault();
+            var jsonObj = jsonData("#form_Update");
+             if(jsonObj == false) {
+                message("All field are Required", false);
+             }else {
+                $.ajax({
+                    url : "http://localhost/rest%20api%20practice/API%20REST/update-data.php",
+                    type : "POST",
+                    data : jsonObj,
+                    success : function(data) {
+                       message(data.message, data.status);
+
+                       if(data.status == true) {
+                        $(".modal").hide();
+                        tableload();
+                       
+                       }
+                    }
+                });
+             }
+             });
+             
+
+
+
+           /********Delete data********/
+            
+           $(document).on("click", "#delete-btn", function() {
+
+            if(confirm("Do You want really Delete This Record ?")) {
+                var client_id = $(this).data("id");
+                var row = this;
+              var obj = {sid : client_id};
+              var jsonData = JSON.stringify(obj);
+
+              $.ajax({
+                   url : "http://localhost/rest%20api%20practice/API%20REST/delete-data.php",
+                   type : "POST",
+                   data : jsonData,
+                   success : function(data) {
+                      message(data.message, data.status);
+
+                      if(data.status == true) {
+                        $(row).closest("tr").fadeOut();
+                      }
+                   }
+              });
+
+                
+            }
+          
+           });
+
+           
+
+    
+   });
+</script>
+</body>
+</html>
